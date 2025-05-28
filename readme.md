@@ -27,3 +27,5 @@ This collection of Markdown files is organized by topic, covering fundamentals t
 
 
 ---
+#### Python notes 
+#### SQL notes
