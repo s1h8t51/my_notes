@@ -2,7 +2,7 @@
 
 #### Course Notes: Data Structures & Algorithms
 
-**Data Structures & Algorithms** course notes 
+**Data Structures & Algorithms** course notes [https://cda500-dsa.netlify.app/introduction/data_structures/]
 
 This collection of Markdown files is organized by topic, covering fundamentals through advanced patterns, LeetCode exercises, and interview strategies.
 
