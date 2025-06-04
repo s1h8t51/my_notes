@@ -1,0 +1,5 @@
+
+why data strutures ?
+data structures is a way of organizing data so that it can be used effectively 
+fast and powerful algorithm 
+help to manage and organize data
