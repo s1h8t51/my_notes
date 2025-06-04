@@ -3,3 +3,31 @@ why data strutures ?
 data structures is a way of organizing data so that it can be used effectively 
 fast and powerful algorithm 
 help to manage and organize data
+
+abstract data type can have different type of implementation ds
+
+big o talks about what heppens when n becomes big
+
+static and dynamic arrays 
+
+array - fixed leangth container containing n elements indexable from the range [0,n-1](indexable meaning each slot can be referenced with a number)
+indexing starts at 0 and ends at n-1
+
+where these are used
+-sorting and accesing sequential data
+-temporaray storage
+-arrays and buffers( to read small chunks)
+-lookup tables due to indexing 
+
+static array (fixed size container )
+(o(1),
+no change in size 
+
+dynamic array ( can acess , search ,insertion ,appending  and deletion )
+can grow in size and even shrink 
+how it is done ?
+every time you add a new element more than the actual created size 
+move the elements to static array
+double the size
+then add new element 
+
