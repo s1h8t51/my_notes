@@ -1,1 +1,673 @@
+# here we discover the imporant fucntions related to the data analyst 
+# np.meadian to find the median
+# mean is sensitive to the extream values
+# right and left skew
+
+# Import numpy with alias np
+import numpy as np 
+# Subset country for USA: usa_consumption
+usa_consumption = food_consumption[(food_consumption['country']=='USA')]
+print(np.mean(usa_consumption['consumption']))
+print(np.median(usa_consumption['consumption']))
+
+#we need to check where the skewness exit in mean or in median 
+
+
+#mesure of spread
+
+#variance  Tells you how much the values differ from the average.
+#standard square root of variance,deviateion  Gives spread in the same unit as data, easier to interpret than variance. 
+#quantiles  Helps divide data into parts (quartiles, percentiles). Useful to detect outliers.
+#linespace  Creates smooth intervals (often used in plotting or quantile-based bins).
+#interquantile range 
+#iqr  Measures the middle 50% spread. Great for identifying outliers.
+
+
+# Example of calculating quartiles with 10 splits
+print(np.quantile(food_consumption['co2_emission'], [0,0.1, 0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]))
+# Calculate total co2_emission per country: emissions_by_country
+emissions_by_country = food_consumption.groupby('country')['co2_emission'].sum()
+
+# Compute the first and third quartiles and IQR of emissions_by_country
+# Calculate total co2_emission per country: emissions_by_country
+emissions_by_country = food_consumption.groupby('country')['co2_emission'].sum()
+
+# Compute the first and third quantiles and IQR of emissions_by_country
+q1 = np.quantile(emissions_by_country, 0.25)
+q3 = np.quantile(emissions_by_country, 0.75)
+iqr = q3 - q1
+
+# Calculate the lower and upper cutoffs for outliers
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
+
+# Subset emissions_by_country to find outliers
+outliers = emissions_by_country[
+    (emissions_by_country < lower) | (emissions_by_country > upper)
+]
+print(outliers)
+
+
+# Count the deals for each product type
+counts = amir_deals['product'].value_counts()
+
+# Calculate probability of selecting each product type
+probs = counts / len(amir_deals)
+
+print(probs)
+
+
+#in with and with out replacement always sampling is preferablu better for with out replacememnt 
+import numpy as np
+
+# Set random seed for reproducibility
+np.random.seed(24)
+
+# Sample 5 deals without replacement from Amir's deals
+sample_without_replacement = amir_deals.sample(n=5, replace=False)
+
+print(sample_without_replacement)
+
+#probability distribution 
+#.shape[0]--This is often used to count records (rows) quickly in a dataset
+
+# Create probability distribution
+size_dist = restaurant_groups['group_size'].value_counts() / restaurant_groups.shape[0]
+# Reset index and rename columns
+size_dist = size_dist.reset_index()
+size_dist.columns = ['group_size', 'prob']
+
+# Expected value
+expected_value = np.sum(size_dist['group_size'] * size_dist['prob'])
+
+# Subset groups of size 4 or more
+groups_4_or_more = size_dist[size_dist['group_size'] >=4]
+
+# Sum the probabilities of groups_4_or_more
+prob_4_or_more = np.sum(groups_4_or_more['prob'])
+print(prob_4_or_more)
+
+
+#started working on with the continues and decrete interval creation and genetaion the plots aacordingly 
+# cdf ---You give a value (x), and it tells you how likely a random variable is less than or equal to x.
+# ppf---You give a probability (p), and it tells you the value (x) where the variable has that much probability up to it.
+# binom.pmf(k, n, p) ,binom.cdf(k, n, p) , binom.ppf(q, n, p)
+#pmf(k, n, p)	Probability Mass Function	P(X = k)	Exact probability
+#cdf(k, n, p)	Cumulative Distribution Function	P(X ≤ k)	Cumulative probability
+#ppf(q, n, p)	Percent Point Function / Reverse CDF	Find k for a given probability q	Inverse lookup
+#If you know the probability, RSV tells you what value gives you that much probability or less.
+
+## Set random seed to 334
+np.random.seed(334)
+
+# Import uniform
+from scipy.stats import uniform
+
+# Generate 1000 wait times between 0 and 30 mins
+wait_times = uniform.rvs(0, 30, size=1000) 
+
+# Create a histogram of simulated times and show plot
+plt.hist(wait_times)
+plt.show()
+
+
+
+## Probability of closing < 1 deal out of 3 deals
+prob_less_than_1 = binom.cdf(1,3,0.3)
+
+## Probability of closing > 1 deal out of 3 deals
+prob_greater_than_1 = 1 - binom.cdf(1,3,0.3)
+
+print(prob_greater_than_1)
+
+# Expected number won with 30% win rate
+won_30pct = 3 * 0.3
+print(won_30pct)
+
+# Expected number won with 25% win rate
+won_25pct = 3*0.25
+print(won_25pct)
+
+# Expected number won with 35% win rate
+won_35pct = 3*0.35
+print(won_35pct)
+
+
+#coming to the normal distribution 
+# norm.function(x, loc=μ, scale=σ)
+norm.cdf(x, loc=mean, scale=std_dev)
+norm.ppf(p, loc=mean, scale=std_dev)
+norm.pdf(x, loc=mean, scale=std_dev)
+
+# based on the question if the descired values is lees than then cdf 
+# > then find cdf the subract the prob with 1
+from scipy.stats import norm
+
+# Use the CDF to find the probability of a deal being less than or equal to $1000
+prob_less_than_1000 = norm.cdf(1000, 5000, 2000)
+
+# Subtract from 1 to find the probability of a deal being more than $1000
+prob_over_1000 = 1 - prob_less_than_1000
+
+print(prob_over_1000)
+
+# as dicussed if we nned to find any values where the prob would be 0.25 then we will use ppf 
+# Calculate amount that 25% of deals will be less than
+pct_25 = norm.ppf(0.25,5000,2000)
+
+print(pct_25)
+
+
+#here we are genearating random variable using rsv
+import matplotlib.pyplot as plt
+# Calculate new average amount
+new_mean = 5000+(5000*0.2)
+
+# Check the calculation of new standard deviation
+new_sd = 2000 * 1.3  # Ensure you're increasing the original standard deviation by 30%
+
+# Check the function used to simulate new sales
+new_sales = norm.rvs(new_mean, new_sd, size=36)  # Use rvs to generate random values
+# Create histogram and show
+plt.hist(new_sales)
+plt.show()
+
+import matplotlib.pyplot as plt
+# Calculate new average amount
+new_mean = 5000+(5000*0.2)
+
+# Check the calculation of new standard deviation
+new_sd = 2000 * 1.3  # Ensure you're increasing the original standard deviation by 30%
+
+# Check the function used to simulate new sales
+new_sales = 1- norm.cdf(1000,new_mean, new_sd)  # Use rvs to generate random values
+# Create histogram and show
+plt.hist(new_sales)
+
+
+#This phenomenon is known as the central limit theorem, which states that a sampling distribution 
+# will approach a normal distribution as the number of trials increases. In our example, 
+# the sampling distribution became closer to the normal distribution as we took more and more sample means. 
+# It's important to note that the central limit theorem only applies when samples are taken randomly and are independent, 
+# for example, randomly picking sales deals with replacement.
+
+
+
+#here calulating the means using for loops for different batches and comparing with the actual mean 
+# Set seed to 104
+np.random.seed(104)
+
+sample_means = []
+# Loop 100 times
+for i in range(100):
+  # Take sample of 20 num_users
+  samp_20 = amir_deals['num_users'].sample(20, replace=True)
+  # Calculate mean of samp_20
+  samp_20_mean = np.mean(samp_20)
+  # Append samp_20_mean to sample_means
+  sample_means.append(samp_20_mean)
+  
+# Convert to Series and plot histogram
+sample_means_series = pd.Series(sample_means)
+sample_means_series.hist()
+# Show plot
+plt.show()
+
+# Set seed to 321
+np.random.seed(321)
+
+sample_means = []
+# Loop 30 times to take 30 means
+for i in range(30):
+  # Take sample of size 20 from num_users col of all_deals with replacement
+  cur_sample = all_deals["num_users"].sample(20,replace=True)
+  # Take mean of cur_sample
+  cur_mean = np.mean(cur_sample)
+  # Append cur_mean to sample_means
+  sample_means.append(cur_mean)
+
+# Print mean of sample_means
+print(np.mean(sample_means))
+
+# Print mean of num_users in amir_deals
+print(np.mean(amir_deals["num_users"]))
+
+#poisson dustribution
+# Counting how many events occur in a fixed time/space (e.g., 5 emails/day) 
+#Amir responds to an average of 4 leads per day → this is your Poisson rate (λ = 4).
+#You want the probability that he responds to exactly 5 leads in a day → this is P(X = 5)
+#this is how poisson works we need to calucate prob over a distribution of time
+#here we wil use pmf instead of pdf as Discrete distributions (like Poisson, Binomial) not Continuous distributions (like Normal)
+
+
+
+# Import poisson from scipy.stats
+from scipy.stats import poisson
+# Probability of 5 responses
+prob_coworker = poisson.pmf(5,5.5)
+# Probability of 2 or fewer responses
+p = poisson.cdf(10,4)
+# Probability of > 10 responses
+p = poisson.cdf(10,4)
+prob_over_10=1-p
+
+print(prob_over_10)
+
+
+
+#exponential distrubution 
+#Continuous distribution ,Measuring time between events (like waiting time between calls),Always skewed right (decreasing curve)
+
+# Import the necessary function from scipy.stats
+from scipy.stats import expon
+
+# Use the CDF to find the probability of a response time being more than 4 hours
+probability_less_than_4 = expon.cdf(4, scale=2.5)
+probability_more_than_4 = 1 - probability_less_than_4
+print(probability_more_than_4)
+# Print probability response takes 3-4 hours
+print(expon.cdf(4, scale=2.5) - expon.cdf(3, scale=2.5))
+
+
+
+#students t distribution 
+#Small-sample inference: means, confidence intervals, t-tests
+#t-distribution	Continuous	Distribution of sample means (small n)	df (degrees of freedom)	t.pdf(x, df)
+
+#coorelation between the variable is expressed using scatter plot 
+#-ve +ve  types exist 
+#seaborn lmplot and scatter are utilized here
+# correlation can never be zero and we can see a random scatter in points 
+#
+
+# Create a scatterplot of happiness_score vs. life_exp and show
+sns.scatterplot(x='life_exp', y='happiness_score', data=world_happiness)
+# Show plot
+plt.show()
+sns.lmplot(x='life_exp', y='happiness_score', data=world_happiness,ci=None)
+# Show plot
+plt.show()
+
+# ci = Confidence Interval It controls the shaded area around the regression line.
+
+
+#Why do we sometimes use scatterplot() instead of lmplot()?
+#🔹 scatterplot():
+#Just plots the raw data points.
+#No regression line, no model fitting.
+#✅ Use when you don’t want to imply a linear relationship.
+#🔹 lmplot():
+#Plots the scatter AND a linear regression line.
+#Also shows confidence interval unless ci=None.
+
+#correlation is found like this 
+
+cor = world_happiness['life_exp'].corr(world_happiness['happiness_score'])
+
+Common Transformations and When to Use Them
+
+
+#Transformation	Use When...	Example Use
+#Log (e.g., log(x))	            Data is exponentially increasing, skewed right,                 Income vs. spending, bacteria growth
+# #                              or has multiplicative relationships	
+#Square (e.g., x²)	            You suspect a U-shaped or quadratic relationship	             Study time vs. stress, temperature vs. crop yield
+#Square Root (e.g., sqrt(x))	Moderate skew, or to compress scale	                             Reaction time, mild right-skewed data
+#Reciprocal (e.g., 1/x)	        Variable increases very fast then levels off (hyperbolic)	     Speed vs. travel time, cost vs. efficiency
+#Log-log or log-linear	        Both variables or one variable grow exponentially	             Size vs. weight, power-law relationships
+
+
+#Design of Experiments (DOE) is a method used to plan and carry out tests in a structured way. 
+# It helps researchers understand how different variables affect an outcome. 
+# By changing one or more factors and keeping others constant, 
+# we can find cause-and-effect relationships. This is useful in science, manufacturing, and product design. 
+# DOE saves time and resources by testing efficiently.
+
+
+
+#Longitudinal studies observe the same people or subjects over a long period. These studies track how something changes over time, 
+# such as health, behavior, or learning. Because they follow the same group, they help identify trends and possible causes of change. 
+# However, they take a lot of time and effort to complete. They are common in medical and social research.
+
+
+#Cross-sectional studies look at many different people or subjects at one point in time. 
+# They give a snapshot of what is happening in a population right now. 
+# These studies are quick and cost-effective, often used in surveys and public health. 
+# But they only show correlation, not cause and effect. Unlike longitudinal studies,
+#  they don't show how things change over time.
+
+
+
+#intro to seaborn 
+#utilizing this for data vizualization 
+#works well with pandas data structures and built on top of matplotlib
+
+#sns.scatterplot(x=,y=)  the relationship between two continuous variables.
+sns.scatterplot(x=gdp, y=phones)
+
+#count plot  visualize the frequency (count) of categories in a single categorical
+sns.countplot(y=region)
+
+#pandas for data analysis
+# tidy df and untidy df where each row will not have same information 
+#  Create a count plot with "Spiders" on the x-axis and with data frame
+sns.countplot(x="Spiders", data=df)
+
+#ordering coloring consitioning can be considered and ledger added to show on the plot 
+#everything can be done with hue 
+
+sns.scatterplot(x="absences", y="G3", 
+                data=student_data, 
+                hue="location",
+                hue_order=["Rural", "Urban"])
+
+#here hue differentiate the location category based on color 
+#by mentioning the order in the hue we can obser that rual comes first or assigned first color and then urban 
+
+sns.countplot(x="school", data=student_data,
+              hue="location",
+              palette=palette_colors)
+
+
+
+#qantitative variable 
+# seaborn vizulization with subplots (col and row)
+#subgroups ie with color (hue)
+#relplot in Seaborn is a figure-level function used to create relational plots,
+#  most commonly scatter plots or line plots, with support for facets and additional dimensions like color, size, and style.
+sns.relplot(x="absences", y="G3", 
+            data=student_data,
+            kind="scatter")
+#Single plot	Overall trend
+sns.relplot(x="absences", y="G3", 
+            data=student_data,
+            kind="scatter", 
+            col="study_time")
+
+#	Horizontal	Side-by-side category comparison
+sns.relplot(x="absences", y="G3", 
+            data=student_data,
+            kind="scatter", 
+            row="study_time")
+
+#Vertical	Top-down category comparison
+
+# both col and row is involved 
+sns.relplot(x="G1", y="G3", 
+            data=student_data,
+            kind="scatter", 
+            col="schoolsup",
+            col_order=["yes", "no"],
+            row="famsup",
+            row_order=["yes", "no"])
+
+
+#other customizations we are using are subgroups wih point size and style 
+#changing point transparency 
+#subgroup with point size meaning a variabl ewith different level is represented
+#when hue added we can differentiate well 
+
+sns.relplot(x="horsepower", y="mpg", 
+            data=mpg, kind="scatter", 
+            size="cylinders",
+            hue="cylinders")
+#based on cylinder size a scatter plot is created between horsepower and mpg in dataset mpg
+
+#subgroup with point style 
+#different point style wrt to different size and shape 
+
+#rel plot is relational plot 
+sns.relplot(x="acceleration", y="mpg", 
+            data=mpg, kind="scatter", 
+            style="origin",
+            hue="origin")
+
+#here the vizualization difference is that the origin of mpg is shown for different countries by giving them different shape and color
+
+#changing point transperancy
+
+
+
+#line plot 
+
+#each plot represent same plot over time
+#style,hue,ci =sd(confidence interval)
+sns.relplot(x="model_year", y="mpg", data=mpg, kind="line")
+
+# Example of using markers and dashes in sns.relplot
+sns.relplot(x="model_year", y="horsepower", 
+            data=mpg, kind="line", 
+            ci=None, style="origin", 
+            hue="origin", markers=True,
+            dashes=False)
+
+
+#countplots and bar plots 
+
+#countplot for creation of categorical plots
+# to get the bars in horizontal way we nned keep category on y axis
+
+# below cat plot do Separate this plot into two side-by-side column 
+# subplots based on "Age Category", which separates 
+# respondents into those that are younger than 21 vs. 21 and older
+sns.catplot(y="Internet usage", data=survey_data,
+            kind="count", col="Age Category") 
+
+
+#Create a bar plot of interest in math, separated by gender
+sns.catplot(x="Gender",
+    y="Interested in Math", data=survey_data,
+            kind="bar") 
+
+
+# List of categories from lowest to highest
+category_order = ["<2 hours", 
+                  "2 to 5 hours", 
+                  "5 to 10 hours", 
+                  ">10 hours"]
+
+# Turn off the confidence intervals
+sns.catplot(x="study_time", y="G3",
+            data=student_data,
+            kind="bar",
+            order=category_order,
+            ci=None)
+
+
+#box plots
+#quantitative variable across groups oof categorical variable 
+#In a box plot (also called a box-and-whisker plot), 
+# the whiskers represent the range of the data excluding outliers.
+sns.catplot(X="study_time",
+            y="G3",
+            data=student_data,
+            kind="box",
+            order=study_time_order)
+
+
+#removing the ouliers in plot 
+sns.catplot(x="internet",
+            y="G3",
+            data=student_data,
+            kind="box",
+            hue="location",
+            sym="")
+
+
+#Adjust the code to make the box plot whiskers to extend to 0.5 * IQR
+sns.catplot(x="romantic", y="G3",
+            data=student_data,
+            kind="box",
+            whis=0.5)
+
+
+
+#to set to min and max values and we can also set to 5,95 quartile
+#by setting whis=[5.95]
+sns.catplot(x="romantic", y="G3",
+            data=student_data,
+            kind="box",
+            whis=[0, 100])
+
+#point plots
+#A point plot is used to visualize mean (or another estimator) 
+# values of a quantitative variable across levels of a 
+# categorical variable, with error bars. It helps highlight trends, differences, and confidence intervals — 
+#often in a cleaner way than bar plots.
+
+sns.catplot(x="famrel", y="absences",
+            data=student_data,
+            kind="point",
+            capsize=0.2,
+            join=False)
+
+
+#capsize can be set and yhe joining line between the lines will be removed 
+
+from numpy import median
+
+# Use the median function as the estimator
+sns.catplot(x="romantic", y="absences",
+            data=student_data,
+            kind="point",
+            hue="school",
+            ci=None,
+            estimator=median)
+#estimator determines how to summarize the data values in each category
+
+
+
+#changing the style and paletter for better presentations 
+
+# Change the color palette to "RdBu"
+sns.set_style("whitegrid")
+sns.set_palette("RdBu")
+# Create a count plot of survey responses
+category_order = ["Never", "Rarely", "Sometimes", 
+                  "Often", "Always"]
+sns.catplot(x="Parents Advice", 
+            data=survey_data, 
+            kind="count", 
+            order=category_order)
+
+# Show plot
+plt.show()
+
+
+# type of context and set styles
+sns.set_style("white")         # White background, no grid
+sns.set_style("dark")          # Dark background
+sns.set_style("whitegrid")     # White background with grid
+sns.set_style("darkgrid")      # Dark background with grid
+sns.set_style("ticks")         # Adds ticks to the axes
+
+sns.set_context("notebook")      # Default for Jupyter
+sns.set_context("paper")         # Smaller scale for printed materials
+sns.set_context("talk")          # Bigger fonts for presentations
+sns.set_context("poster")        # Even bigger, for large display
+
+
+#setting color palets # Set a custom color palette
+sns.set_palette(["#39A7D0", "#36ADA4"])
+
+
+
+#adding title and labels 
+
+#creating informative vizualization 
+#facet grids(we will have 4 graphs at once) and Axes subplots object
+# to set title and x , y labels
+g.set_title("Average MPG Over Time")
+g.set(xlabel="Car Model Year", 
+      ylabel="Average MPG")
+
+# Rotate x-tick labels
+plt.xticks(rotation=90)
+
+#if FacetGrid object then title needed bti be like this 
+g.fig.suptitle("Age of Those Interested in Pets vs. Not")
+
+
+#summary 
+
+#Examples of relational plots that we've seen in this course are scatter plots and line plots
+#You can create a relational plot using "relplot()" and providing it with the x-axis variable name, y-axis variable name, the pandas tidy DataFrame, and the type of plot (either scatter or line).
+#Examples of categorical plots we've seen are bar plots, count plots, box plots, and point plots. You can create a categorical plot using "catplot()" and providing it with the x-axis variable name, y-axis variable name (if applicable), 
+# the pandas tidy DataFrame, and the type of plot (either bar, count, box, or point).
+#"hue" parameter to a variable name will create a single plot but will show subgroups that are different colors based on that variable's values.
+#Adding a third variable (row/col)
+#You can change the background of the plot using "set_style", the color of the main elements using "set_palette", and the scale of the plot using "set_context".
+#FacetGrids and AxesSubplots - and the way to add a title to each of them.
+#
+
+
+# Set the figure style to "dark"
+sns.set_style("dark")
+
+# Adjust to add subplots per gender
+g = sns.catplot(x="Village - town", y="Likes Techno", 
+                data=survey_data, kind="bar",
+                col="Gender")
+
+# Add title and axis labels
+g.fig.suptitle("Percentage of Young People Who Like Techno", y=1.02)
+g.set(xlabel="Location of Residence", 
+       ylabel="% Who Like Techno")
+
+# Show plot
+plt.show()
+
+
+
+
+
+
+# data exploratory analysis 
+#df.head() -- to print top 5 rows
+#df.info()  -- using pandas to print the summary of columns
+#df.describe() -- Print the summary statistics (count, mean, standard deviation, min, max, and quartile values) of each numerical column
+#df.value_counts("colname") -- method to count the values associated with each col
+
+
+
+#What was typical unemployment in a given year? What was the minimum and 
+#maximum unemployment rate, and what did the distribution of the unemployment 
+#rates look like across the world? A histogram is a great way to get a sense 
+#of the answers to these questions.
+
+# Create a histogram of 2021 unemployment; show a full percent in each bin
+sns.histplot(data=unemployment, x="2021", binwidth=1)
+plt.show()
+
+
+#data validation 
+#checking the data types are validated or not 
+df.dtypes -- gives all the data types values
+
+#if we are not satisfies with the types pf data type we have change it 
+#how to change this will be like this 
+
+df[col].astype(int) -- we cna change like this 
+df[col].isin(["cat_values"]) --- we can check the categoriacal value like this 
+df.select_styoes("number").head() -- this will give only numerical type of data 
+
+#boxplot can be used to show the quartiles of data 
+
+task : -- how to extarct a aparticular category related data 
+
+all rows in the unemployment DataFrame where the continent is NOT "Oceania".
+this can be expressed as 
+ x= unemployment["continent"].isin(["Oceania"])
+#above one will give boolean values 
+print(unemployment[x]) --will give all continent vales not in oceania
+
+
+
+
+
+
+
+
+
+
+
 
