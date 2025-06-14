@@ -661,6 +661,279 @@ this can be expressed as
 print(unemployment[x]) --will give all continent vales not in oceania
 
 
+#Why Missing Data Matters ?
+Example: collecting student heights but omitting the oldest (tallest) students → sample mean too low
+Missing sub-groups make your sample unrepresentative → bad conclusions
+
+checking missing values
+salaries.isna().sum()
+
+General Strategies :
+Drop rows if missing ≤ 5% of total
+
+identify col 
+cols_to_drop = [col for col in df if df[col].isna().sum() <= threshold]
+
+drop any row thats missing those columns 
+df.dropna(subset=cols_to_drop, inplace=True)
+
+
+
+Otherwise, impute:
+Replace with a summary statistic (mean/median/mode)
+Or group-wise impute, e.g. median salary by experience level
+
+for col in first_three_cols:
+    df[col].fillna(df[col].mode()[0], inplace=True)
+med_by_exp = df.groupby('Experience')['Salary_USD'].median().to_dict()
+df['Salary_USD'].fillna(df['Experience'].map(med_by_exp), inplace=True)
+
+
+# Count the number of missing values in each column
+print(planes.isna().sum())
+
+# Find the five percent threshold
+threshold = len(planes) * 0.05
+
+# Create a filter
+cols_to_drop = planes.columns[planes.isna().sum() <= threshold]
+
+# Drop missing values for columns below the threshold
+planes.dropna(subset=cols_to_drop, inplace=True)
+
+print(planes.isna().sum())
+
+
+
+# Calculate median plane ticket prices by Airline
+airline_prices = planes.groupby("Airline")["Price"].median()
+
+print(airline_prices)
+
+# Convert to a dictionary
+prices_dict = airline_prices.to_dict()
+
+# Map the dictionary to missing values of Price by Airline
+planes["Price"] = planes["Price"].fillna(planes["Airline"].map(prices_dict))
+
+# Check for missing values
+print(planes.isna().sum())
+
+
+Converting and Analyzing Categorical Data
+
+df.select_dtypes(exclude='number').head()
+
+#vaue frequencies
+df['Designation'].value_counts()
+
+#count of unique categories
+df['Designation'].nunique()  # e.g. 50 unique titles
+
+#extracting patterns  and  Create conditions for values
+df['Designation'].str.contains('Scientist', na=False)
+
+#OR search with regex pipe:
+df['Designation'].str.contains('Machine Learning|AI', na=False)
+
+Start-of-string match:
+df['Designation'].str.contains('^Data', na=False)
+
+
+example:
+# 1. Select all non-numeric (object) columns
+non_numeric = planes.select_dtypes(exclude='number')
+
+# 2. Loop over each column name
+for col in non_numeric.columns:
+    # 3. Print the count of unique values in that column
+    print(f"Number of unique values in '{col}' column:", non_numeric[col].nunique())
+
+example
+# Create conditions for values in flight_categories to be created
+conditions = [
+    (planes["Duration"].str.contains(short_flights)),
+    (planes["Duration"].str.contains(medium_flights)),
+    (planes["Duration"].str.contains(long_flights))
+]
+
+# Apply the conditions list to the flight_categories
+planes["Duration_Category"] = np.select(conditions, 
+                                        flight_categories,
+                                        default="Extreme duration")
+
+# Plot the counts of each category
+sns.countplot(data=planes, x="Duration_Category")
+plt.show()
+
+
+
+Shift focus to numeric columns and operations:
+if the numerical data is stored in comma separated string values
+
+remove commas 
+df['Salary_In_Rupees'] = df['Salary_In_Rupees'].str.replace(',', '')
+
+coverting type to float
+df['Salary_In_Rupees'] = df['Salary_In_Rupees'].astype(float
+
+Converting to USD 
+df['Salary_USD'] = df['Salary_In_Rupees'] * 0.012
+
+Grouped Summary Tables
+df.groupby('Company_Size')['Salary_USD'].mean()
+
+Adding Group-Wise Statistics In-Place 
+df['std_dev_salary'] = (
+    df.groupby('Experience')['Salary_USD']
+      .transform(lambda x: x.std())
+)
+
+Examining Combinations
+df[['Experience', 'std_dev_salary']].value_counts()
+
+
+Adding Other Statistics
+df['median_by_size'] = (
+    df.groupby('Company_Size')['Salary_USD']
+      .transform('median')
+)
+
+
+handling outliers
+these are handeled using quantile
+
+
+
+#Detect time-based trends when your data includes dates or timestamps
+to avoid pandas read date as string 
+
+df = pd.read_csv('divorces.csv', parse_dates=['marriage_date'])
+
+
+#finding correlation 
+df.corr()
+
+#utilizing heatmap of seaborn for correlation vizualization 
+import seaborn as sns
+sns.heatmap(df.corr(), annot=True, cmap='Purples')
+
+#scatter plots for pairs
+
+sns.scatterplot(data=df,
+                x='female_income',
+                y='male_income')
+
+#pair plots for mutli variable views
+
+sns.pairplot(df)
+sns.pairplot(df, vars=['female_income','male_income','marriage_duration'])
+
+#How categories (factors) relate to one another and to numeric outcomes.
+
+Examining Education Levels of Male Partner
+df['education_man'].value_counts()
+
+#Visualizing Marriage Duration by Education
+
+sns.histplot(data=df,
+             x='marriage_duration',
+             hue='education_man',
+             multiple='stack')
+sns.kdeplot(data=df,
+            x='marriage_duration',
+            hue='education_man',
+            fill=True)
+
+#cut helps to get the details only upto a point 
+sns.kdeplot(..., cut=0)
+
+# Update the KDE plot to show a cumulative distribution function
+sns.kdeplot(data=divorce, x="marriage_duration", hue="num_kids", cut=0, cumulative=True)
+plt.show()
+
+sns.scatterplot(..., hue='education_man')
+
+#considering categorical data
+
+df['destination'].value_counts()
+#relative frequencies
+df['destination'].value_counts(normalize=True)
+
+
+A contingency table (also called a “cross‐tabulation” or “crosstab”) is simply a matrix that displays
+the joint frequency distribution of two (or more) categorical variables.
+
+pd.crosstab(index=df['Source'], columns=df['Destination'])
+#extended cross tab with aggregation
+pd.crosstab(
+    index=df['Source'],
+    columns=df['Destination'],
+    values=df['Price'],
+    aggfunc='median'
+)
+
+
+#generating new features 
+Converting “Total_Stops” to Numeric
+
+df['Total_Stops'].value_counts()
+df['Total_Stops'] = df['Total_Stops'].astype(int)
+
+extracting date and tiime values 
+df['journey_month']  = pd.to_datetime(df['Date_of_Journey']).dt.month
+df['journey_weekday']= pd.to_datetime(df['Date_of_Journey']).dt.weekday
+
+df['dep_hour'] = pd.to_datetime(df['Dep_Time']).dt.hour
+df['arr_hour'] = pd.to_datetime(df['Arrival_Time']).dt.hour
+
+#creating bind and quantiles we can crate a new col
+
+q25 = df['Price'].quantile(0.25)
+q50 = df['Price'].median()
+q75 = df['Price'].quantile(0.75)
+q100= df['Price'].max()
+
+bins   = [0, q25, q50, q75, q100]
+labels = ['Economy', 'Premium Econ', 'Business', 'First']
+
+df['Price_Category'] = pd.cut(df['Price'], bins=bins, labels=labels)
+
+
+#vizualizing new cat values
+
+sns.countplot(data=df, x='Airline', hue='Price_Category')
+plt.xticks(rotation=45)
+plt.tight_layout()
+
+
+# Get the month of the response
+salaries["month"] =salaries["date_of_response"].dt.month
+
+# Extract the weekday of the response
+salaries["weekday"] = salaries["date_of_response"].dt.weekday
+
+# Create a heatmap
+sns.heatmap(salaries.corr(), annot=True)
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
